@@ -5,24 +5,39 @@ require 'open-uri'
 
 module Fotofetch
   class Fetch
-    def fetch_images(topic, amount=1, sources=false)
-      links = []
+
+    # arguments for method are: search value, links returned, and include sources?
+    def fetch_links(topic, amount=1, sources=false)
+      urls = []
       results = {}.compare_by_identity
       agent = Mechanize.new
       page = agent.get("http://www.bing.com/images/search?q=#{topic}")
-      page.links.each { |link| links << link.href } # gathers all links
-      links = (links.select { |link| link.include?(".jpg") })[0..(amount-1)] # keeps only .jpg links
+      page.links.each { |link| urls << link.href } # gathers all urls
+      urls = (urls.select { |link| link.include?(".jpg") })[0..(amount-1)] # keeps only .jpg urls
       if sources
-        links.each { |link| results[link.split("/")[2]] = link} # adds sources as hash keys
+        with_sources(urls, results)
       else
-        results = Hash[(0...links.size).zip links]
+        results = no_sources(urls, results)
       end
       results
-      byebug
     end
 
-    def save_images
+    def with_sources(urls, results)
+      urls.each { |link| results[link.split("/")[2]] = link} # adds sources as hash keys
+    end
 
+    # non-source keys are simply indices to keep the method's class type return consistent
+    def no_sources(urls, results)
+      Hash[(0...urls.size).zip urls]
+    end
+
+    # takes an array of links
+    def save_images(urls, file_path)
+      urls.each_with_index do |url, i|
+        open("image_#{i}.jpg", 'wb') do |file|
+          file << open(url).read
+        end
+      end
     end
 
   end
