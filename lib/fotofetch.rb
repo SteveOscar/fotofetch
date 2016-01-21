@@ -1,6 +1,7 @@
 require "fotofetch/version"
 require 'mechanize'
 require 'open-uri'
+require 'fastimage'
 
 
 module Fotofetch
@@ -14,16 +15,12 @@ module Fotofetch
       page = agent.get("http://www.bing.com/images/search?q=#{topic}")
       page.links.each { |link| urls << link.href } # gathers all urls
       urls = (urls.select { |link| link.include?(".jpg") })[0..(amount-1)] # keeps only .jpg urls
-      if sources
-        with_sources(urls, results)
-      else
-        results = no_sources(urls, results)
-      end
+      urls.each { |link| results[link.split("/")[2]] = link} # adds sources as hash keys
       results
     end
 
     def with_sources(urls, results)
-      urls.each { |link| results[link.split("/")[2]] = link} # adds sources as hash keys
+
     end
 
     # non-source keys are simply indices to keep the method's class type return consistent
@@ -38,6 +35,10 @@ module Fotofetch
           file << open(url).read
         end
       end
+    end
+
+    def check_size(link)
+      FastImage.size(link)
     end
 
   end
