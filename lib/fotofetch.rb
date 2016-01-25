@@ -3,30 +3,55 @@ require 'mechanize'
 require 'open-uri'
 require 'fastimage'
 
-
 module Fotofetch
   class Fetch
 
-    # arguments for method are: search value, links returned, and include sources?
-    def fetch_links(topic, amount=1)
-      scrape(topic, amount)
+    # arguments for method are: search value, number of links returned, and dimension restrictions
+    def fetch_links(topic, amount=1, width= +9999, height= +9999)
+      scrape(topic, amount, width, height)
     end
 
-    def scrape(topic, amount)
+    def scrape(topic, amount, width, height)
       agent = Mechanize.new
       page = agent.get("http://www.bing.com/images/search?q=#{topic}")
-      pluck_urls(page, amount)
+      pluck_urls(page, amount, width, height)
     end
 
-    def pluck_urls(page, amount)
+    def pluck_urls(page, amount, width, height)
       urls = []
-      page.links.each { |link| urls << link.href } # gathers all urls
-      pluck_jpgs(urls, amount)
+      page.links.each { |link| urls << link.href } # gathers all urls.
+      pluck_jpgs(urls, amount, width, height)
     end
 
-    def pluck_jpgs(urls, amount)
-      urls = (urls.select { |link| link.include?(".jpg") })[0..(amount-1)] # keeps only .jpg urls
+    def pluck_jpgs(urls, amount, width, height)
+      urls = (urls.select { |link| link.include?(".jpg") }) # keeps only .jpg urls.
+      (urls = restrict_dimensions(urls, width, height)) if restrictions?(width, height)
+      urls = urls[0..(amount-1)] # selects only number of links desired, default is 1.
       add_sources(urls)
+    end
+
+    def restrictions?(width, height)
+      (width != 9999 || height!= 9999) ? true : false
+    end
+
+    def restrict_dimensions(urls, width, height)
+      if width.abs == width && height.abs == height
+        urls.select { |link| (width?(width) ? (check_size(link)[0] > width) : true) && (height?(height) ? (check_size(link)[1] > height) : true) }
+      elsif width.abs != width && height.abs != height
+        urls.select { |link| (width?(width) ? (check_size(link)[0] < width) : true) && (height?(height) ? (check_size(link)[1] < height) : true) }
+      elsif width.abs == width && height.abs != height
+        urls.select { |link| (width?(width) ? (check_size(link)[0] > width) : true) && (height?(height) ? (check_size(link)[1] < height) : true) }
+      else
+        urls.select { |link| (width?(width) ? (check_size(link)[0] < width) : true) && (height?(height) ? (check_size(link)[1] > height) : true) }
+      end
+    end
+
+    def width?(width)
+      width != 9999
+    end
+
+    def height?(height)
+      height != 9999
     end
 
     def add_sources(urls)
@@ -45,7 +70,8 @@ module Fotofetch
     end
 
     def check_size(link)
-      FastImage.size(link)
+      size = FastImage.size(link)
+      size.nil? ? [0, 0] : size
     end
 
   end

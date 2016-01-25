@@ -6,7 +6,7 @@ class FotofetchTest < Minitest::Test
   def setup
     @ff = Fotofetch::Fetch.new
   end
-
+  
   def test_that_it_has_a_version_number
     refute_nil ::Fotofetch::VERSION
   end
@@ -41,5 +41,16 @@ class FotofetchTest < Minitest::Test
     assert_equal 2, dimensions.count
   end
 
+  def test_it_can_restrict_image_dimensions
+    link = @ff.fetch_links("mars", 1, +500).values
+    big = @ff.check_size(link.first)[0]
+
+    restricted_link = @ff.fetch_links("mars", 1, -400).values
+    small = @ff.check_size(restricted_link.first)[0]
+
+    difference = big - small
+
+    assert (difference > 100)
+  end
 
 end
