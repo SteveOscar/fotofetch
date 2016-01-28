@@ -6,7 +6,9 @@ require 'fastimage'
 module Fotofetch
   class Fetch
 
-    # arguments for method are: search value, number of links returned, and dimension restrictions
+    # arguments for method are: search value, number of links returned, and dimension restrictions.
+    # if a dimension argument is positive, it will look for pictures larger than that,
+    # and if the number is negative, results will be restricted to those smaller than that.
     def fetch_links(topic, amount=1, width= +9999, height= +9999)
       scrape(topic, amount, width, height)
     end
@@ -36,13 +38,13 @@ module Fotofetch
 
     def restrict_dimensions(urls, width, height)
       if width.abs == width && height.abs == height
-        urls.select { |link| (width?(width) ? (check_size(link)[0] > width) : true) && (height?(height) ? (check_size(link)[1] > height) : true) }
+        urls.select { |link| width_check(width, link, :>) && height_check(height, link, :>) }
       elsif width.abs != width && height.abs != height
-        urls.select { |link| (width?(width) ? (check_size(link)[0] < width) : true) && (height?(height) ? (check_size(link)[1] < height) : true) }
+        urls.select { |link| width_check(width, link, :<) && height_check(height, link, :<) }
       elsif width.abs == width && height.abs != height
-        urls.select { |link| (width?(width) ? (check_size(link)[0] > width) : true) && (height?(height) ? (check_size(link)[1] < height) : true) }
+        urls.select { |link| width_check(width, link, :>) && height_check(height, link, :<) }
       else
-        urls.select { |link| (width?(width) ? (check_size(link)[0] < width) : true) && (height?(height) ? (check_size(link)[1] > height) : true) }
+        urls.select { |link| width_check(width, link, :<) && height_check(height, link, :>) }
       end
     end
 
@@ -50,8 +52,16 @@ module Fotofetch
       width != 9999
     end
 
+    def width_check(width, link, operator)
+      (width?(width) ? ((check_size(link)[0]).send(operator, width)) : true)
+    end
+
     def height?(height)
       height != 9999
+    end
+
+    def height_check(height, link, operator)
+      (height?(height) ? ((check_size(link)[1]).send(operator, height)) : true)
     end
 
     def add_sources(urls)
