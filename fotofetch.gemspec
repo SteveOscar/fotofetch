@@ -9,9 +9,9 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Steven Olson"]
   spec.email         = ["steveoscaro@gmail.com"]
 
-  spec.summary       = %q{TODO: Write a short summary, because Rubygems requires one.}
-  spec.description   = %q{TODO: Write a longer description or delete this line.}
-  spec.homepage      = "TODO: Put your gem's website or public repo URL here."
+  spec.summary       = %q{Fotofetch searches for and brings in images.}
+  spec.description   = %q{Fotofetch searches for and brings in images. Fotofetch searches for and brings in images. Fotofetch searches for and brings in images.}
+  spec.homepage      = "https://github.com/SteveOscar/fotofetch"
   spec.license       = "MIT"
 
   # Prevent pushing this gem to RubyGems.org by setting 'allowed_push_host', or

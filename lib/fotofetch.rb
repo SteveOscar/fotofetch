@@ -1,7 +1,8 @@
-require "fotofetch/version"
+require 'fotofetch/version'
 require 'mechanize'
 require 'open-uri'
 require 'fastimage'
+require 'byebug'
 
 module Fotofetch
   class Fetch
@@ -10,6 +11,7 @@ module Fotofetch
     # if a dimension argument is positive, it will look for pictures larger than that,
     # and if the number is negative, results will be restricted to those smaller than that.
     def fetch_links(topic, amount=1, width= +9999, height= +9999)
+      @results = []
       scrape(topic, amount, width, height)
     end
 
@@ -27,8 +29,10 @@ module Fotofetch
 
     def pluck_jpgs(urls, amount, width, height)
       urls = (urls.select { |link| link.include?(".jpg") }) # keeps only .jpg urls.
-      (urls = restrict_dimensions(urls, width, height)) if restrictions?(width, height)
-      urls = urls[0..(amount-1)] # selects only number of links desired, default is 1.
+      restrict_dimensions(urls, width, height, amount) if restrictions?(width, height)
+      byebug
+      @results = urls if @results.empty?
+      urls = @results[0..(amount-1)] # selects only number of links desired, default is 1.
       add_sources(urls)
     end
 
@@ -36,16 +40,32 @@ module Fotofetch
       (width != 9999 || height!= 9999) ? true : false
     end
 
-    def restrict_dimensions(urls, width, height)
+    def restrict_dimensions(urls, width, height, amount)
       if width.abs == width && height.abs == height
-        urls.select { |link| width_check(width, link, :>) && height_check(height, link, :>) }
+        urls.each { |link| select_links1(link, width, height) unless @results.length >= amount }
       elsif width.abs != width && height.abs != height
-        urls.select { |link| width_check(width, link, :<) && height_check(height, link, :<) }
+        urls.each { |link| select_links2(link, width, height) unless @results.length >= amount }
       elsif width.abs == width && height.abs != height
-        urls.select { |link| width_check(width, link, :>) && height_check(height, link, :<) }
+        urls.each { |link| select_links3(link, width, height) unless @results.length >= amount }
       else
-        urls.select { |link| width_check(width, link, :<) && height_check(height, link, :>) }
+        urls.each { |link| select_links4(link, width, height) unless @results.length >= amount }
       end
+    end
+
+    def select_links1(link, width, height)
+      @results << link if (width_check(width.abs, link, :>) && height_check(height.abs, link, :>))
+    end
+
+    def select_links2(link, width, height)
+      @results << link if (width_check(width.abs, link, :<) && height_check(height.abs, link, :<))
+    end
+
+    def select_links3(link, width, height)
+      @results << link if (width_check(width.abs, link, :>) && height_check(height.abs, link, :<))
+    end
+
+    def select_links4(link, width, height)
+      @results << link if (width_check(width.abs, link, :<) && height_check(height.abs, link, :>))
     end
 
     def width?(width)
