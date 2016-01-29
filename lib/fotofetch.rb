@@ -30,7 +30,6 @@ module Fotofetch
     def pluck_jpgs(urls, amount, width, height)
       urls = (urls.select { |link| link.include?(".jpg") }) # keeps only .jpg urls.
       restrict_dimensions(urls, width, height, amount) if restrictions?(width, height)
-      byebug
       @results = urls if @results.empty?
       urls = @results[0..(amount-1)] # selects only number of links desired, default is 1.
       add_sources(urls)
@@ -53,19 +52,25 @@ module Fotofetch
     end
 
     def select_links1(link, width, height)
-      @results << link if (width_check(width.abs, link, :>) && height_check(height.abs, link, :>))
+      size = check_size(link)
+      @results << link if (width_check(width.abs, size[0], :>) && height_check(height.abs, size[1], :>))
     end
 
     def select_links2(link, width, height)
-      @results << link if (width_check(width.abs, link, :<) && height_check(height.abs, link, :<))
+      size = check_size(link)
+      @results << link if (width_check(width.abs, size[0], :<) && height_check(height.abs, size[1], :<))
     end
 
     def select_links3(link, width, height)
-      @results << link if (width_check(width.abs, link, :>) && height_check(height.abs, link, :<))
+      size = check_size(link)
+      @results << link if (width_check(width.abs, size[0], :>) && height_check(height.abs, size[1], :<))
     end
 
     def select_links4(link, width, height)
-      @results << link if (width_check(width.abs, link, :<) && height_check(height.abs, link, :>))
+      size = check_size(link)
+      unless size == [0, 0]
+        @results << link if (width_check(width.abs, size[0], :<) && height_check(height.abs, size[1], :>))
+      end
     end
 
     def width?(width)
@@ -73,7 +78,7 @@ module Fotofetch
     end
 
     def width_check(width, link, operator)
-      (width?(width) ? ((check_size(link)[0]).send(operator, width)) : true)
+      (width?(width) ? (link.send(operator, width)) : true)
     end
 
     def height?(height)
@@ -81,7 +86,7 @@ module Fotofetch
     end
 
     def height_check(height, link, operator)
-      (height?(height) ? ((check_size(link)[1]).send(operator, height)) : true)
+      (height?(height) ? (link.send(operator, height)) : true)
     end
 
     def add_sources(urls)
