@@ -7,9 +7,11 @@ require 'byebug'
 module Fotofetch
   class Fetch
 
-    # arguments for method are: search value, number of links returned, and dimension restrictions.
-    # if a dimension argument is positive, it will look for pictures larger than that,
+    # Arguments for fetch_links method are: search value, number of links returned,
+    # and dimension restrictions (width, height).
+    # If a dimension argument is positive, it will look for pictures larger than that,
     # and if the number is negative, results will be restricted to those smaller than that.
+    # If a small or large enough image is not found, dimension restrictions will be disregarded.
     def fetch_links(topic, amount=1, width= +9999, height= +9999)
       @results = []
       scrape(topic, amount, width, height)
@@ -53,17 +55,23 @@ module Fotofetch
 
     def select_links1(link, width, height)
       size = check_size(link)
-      @results << link if (width_check(width.abs, size[0], :>) && height_check(height.abs, size[1], :>))
+      unless size == [0, 0]
+        @results << link if (width_check(width.abs, size[0], :>) && height_check(height.abs, size[1], :>))
+      end
     end
 
     def select_links2(link, width, height)
       size = check_size(link)
-      @results << link if (width_check(width.abs, size[0], :<) && height_check(height.abs, size[1], :<))
+      unless size == [0, 0]
+        @results << link if (width_check(width.abs, size[0], :<) && height_check(height.abs, size[1], :<))
+      end
     end
 
     def select_links3(link, width, height)
       size = check_size(link)
-      @results << link if (width_check(width.abs, size[0], :>) && height_check(height.abs, size[1], :<))
+      unless size == [0, 0]
+        @results << link if (width_check(width.abs, size[0], :>) && height_check(height.abs, size[1], :<))
+      end
     end
 
     def select_links4(link, width, height)
