@@ -5,8 +5,8 @@ require 'fastimage'
 
 module Fotofetch
   class Fetch
-
     def fetch_links(topic, amount=1, width= +9999, height= +9999)
+      @query = topic
       @results = []
       scrape(topic, amount, width, height)
     end
@@ -69,7 +69,7 @@ module Fotofetch
     # takes an array of links
     def save_images(urls, file_path)
       urls.each_with_index do |url, i|
-        open("image_#{i}.jpg", 'wb') do |file|
+        open("#{@query.gsub(' ', '-')}_#{i}.jpg", 'wb') do |file|
           file << open(url).read
         end
       end

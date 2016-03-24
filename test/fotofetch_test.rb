@@ -29,9 +29,9 @@ class FotofetchTest < Minitest::Test
     link = @ff.fetch_links("tesla", 1).values
     @ff.save_images(link, './')
 
-    assert  File.exist?('image_0.jpg')
-    refute  File.zero?('image_0.jpg')
-    File.delete('image_0.jpg')
+    assert  File.exist?('tesla_0.jpg')
+    refute  File.zero?('tesla_0.jpg')
+    File.delete('tesla_0.jpg')
   end
 
   def test_it_checks_image_size
