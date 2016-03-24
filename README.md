@@ -1,8 +1,15 @@
 # Fotofetch
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/fotofetch`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+Arguments for fetch_links method are: search value, optional number of links returned,
+and optional dimension restrictions (width, height).
+If a dimension argument is positive, it will look for pictures larger than that,
+and if the number is negative, results will be restricted to those smaller than that.
+Initiate an instance to use: @fetcher = Fotofetch::Fetch.new
+The fetch_links method will return results like: http:example.com/image.jpg)
+To find a 1 small photo of Jupiter, call @fetcher.fetch_links("jupiter", 1, -500, -500).
+To find 3 large photos of Jupiter, call @fetcher.fetch_links("jupiter", 3, 1500, 1500).
+To grab just the first provided photo, call @fetcher.fetch_links("jupiter").
+If a small or large enough image is not found, dimension restrictions will be disregarded.
 
 ## Installation
 
