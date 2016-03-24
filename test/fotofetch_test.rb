@@ -80,4 +80,9 @@ class FotofetchTest < Minitest::Test
     assert size[1] < 900
   end
 
+  def test_it_dimensions_are_disregarded_if_no_matches_found
+    link = @ff.fetch_links("mars", 1, 10000, 10000).values
+    assert link
+  end
+
 end
