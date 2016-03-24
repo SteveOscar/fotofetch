@@ -38,7 +38,7 @@ The 'save_images' method takes two arguments: link(s) and the file path for wher
 Arguments for the 'fetch_links' method are: search value (required), number of links returned (optional), and two dimension restrictions arguments (optional: width, height).  
 
 If a dimension argument is positive, it will look for pictures larger than that,
-and if the number is negative, results will be restricted to those smaller than that.
+and if the number is negative, results will be restricted to those smaller than that. Note that adding dimensions restrictions to your query will slow it down.
 
 - To find a 1 small photo of Jupiter less than 500px x 500px:
 ```ruby
