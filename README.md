@@ -28,9 +28,9 @@ Or install it yourself as:
 ```ruby
 link = @fetcher.fetch_links("tesla model s")
 ```  
-- To save the link to your file directory
+- To save the link to your file directory (links must be in an array, so call .values):
 ```ruby
-@ff.save_images(link, './')
+@ff.save_images(link.values, './')
 ```  
 The 'save_images' method takes two arguments: link(s) and the file path for where to save.
 
@@ -50,7 +50,7 @@ links = @fetcher.fetch_links("jupiter", 3, 1500, 1500)
 ```
 And to save all of those links:
 ```ruby
-@fetcher.save_images(links, './')
+@fetcher.save_images(links.values, './')
 ```
 If a small or large enough image is not found, dimension restrictions will be disregarded.
 
