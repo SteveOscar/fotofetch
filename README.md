@@ -32,7 +32,7 @@ link = @fetcher.fetch_links("tesla model s")
 ```ruby
 @ff.save_images(link.values, './')
 ```  
-The 'save_images' method takes two arguments: link(s) and the file path for where to save.
+The 'save_images' method takes two arguments: link(s) and the file path for where to save. File names are gerated from the previous query, so if you search for 2 images of 'red_ball', they will be saved as 'red_ball_0.jpg' and 'red_ball_1.jpg'.
 
 ## More Specific Queries
 Arguments for the 'fetch_links' method are: search value (required), number of links returned (optional), and two dimension restrictions arguments (optional: width, height).  
