@@ -12,7 +12,7 @@ module Fotofetch
     # If a dimension argument is positive, it will look for pictures larger than that,
     # and if the number is negative, results will be restricted to those smaller than that.
     # Initiate an instance to use: @fetcher = Fotofetch::Fetch.new
-    # The fetch_links method will return results like: [{ example.com: http:example.com/image.jpg }]
+    # The fetch_links method will return results like: http:example.com/image.jpg)
     # To find a 1 small photo of Jupiter, call @fetcher.fetch_links("jupiter", 1, -500, -500).
     # To find 3 large photos of Jupiter, call @fetcher.fetch_links("jupiter", 3, 1500, 1500).
     # To grab just the first provided photo, call @fetcher.fetch_links("jupiter").
@@ -31,11 +31,11 @@ module Fotofetch
     def pluck_urls(page, amount, width, height)
       urls = []
       page.links.each { |link| urls << link.href } # gathers all urls.
-      pluck_jpgs(urls, amount, width, height)
+      pluck_imgs(urls, amount, width, height)
     end
 
-    def pluck_jpgs(urls, amount, width, height)
-      urls = (urls.select { |link| link.include?(".jpg") }) # keeps only .jpg urls.
+    def pluck_imgs(urls, amount, width, height)
+      urls = (urls.select { |link| link.include?(".jpg") || link.include?(".png") })
       restrict_dimensions(urls, width, height, amount) if restrictions?(width, height)
       @results = urls if @results.empty?
       urls = @results[0..(amount-1)] # selects only number of links desired, default is 1.
@@ -55,7 +55,7 @@ module Fotofetch
     def select_links(link, width, height)
       # Two arrays: first is dimension restrictions, 2nd is link dimensions.
       sizes = [[width, height], link_dimensions(link)]
-      unless link_dimensions(link) == [0, 0] # Throws out non-image links
+      unless link_dimensions(link) == [0, 0] # Throws out non-direct-image links
         @results << link if width_ok?(sizes) && height_ok?(sizes)
       end
     end

@@ -15,7 +15,7 @@ class FotofetchTest < Minitest::Test
     links = @ff.fetch_links("tesla model s", 5)
 
     assert_equal 5, links.count
-    assert links.first[1].include?('.jpg')
+    assert links.first[1].include?('.jpg') || links.first[1].include?('.png')
   end
 
   def test_it_saves_sources_for_links
