@@ -2,7 +2,6 @@ require 'fotofetch/version'
 require 'mechanize'
 require 'open-uri'
 require 'fastimage'
-require 'byebug'
 
 module Fotofetch
   class Fetch
