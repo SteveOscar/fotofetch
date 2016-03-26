@@ -1,6 +1,6 @@
 # Fotofetch
 
-This gem allows the simple searching for and saving of images to your app. Various photo-searching API's will provide more consistent results, but this is a quick way to find images matching a query. Results can be restricted by photo dimensions and batch-saved to you directory. This gem was extracted from an app to fetch movie posters for a movie suggestion [site](http://www.nonshittymovies.com), which dynamically creates the content on each page load.
+This gem allows the simple searching for and saving of images to your app. Various photo-searching API's will provide more consistent results, but this is a quick way to find images matching a query. Results can be restricted by photo dimensions and batch-saved to your directory. This gem was extracted from an app to fetch movie posters for a movie suggestion [site](http://www.nonshittymovies.com), which dynamically creates the content on each page load.
 
 ## Installation
 
