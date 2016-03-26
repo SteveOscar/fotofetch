@@ -63,7 +63,7 @@ class FotofetchTest < Minitest::Test
     assert_equal true, @ff.height_ok?(sizes)
   end
 
-  def test_it_can_restrict_image_dimensions_integration
+  def test_it_can_restrict_image_dimensions
     link = @ff.fetch_links("mars", 1, 1000, 1000).values
     big = @ff.link_dimensions(link.first)[0]
 
@@ -80,8 +80,11 @@ class FotofetchTest < Minitest::Test
     assert size[1] < 900
   end
 
-  def test_it_dimensions_are_disregarded_if_no_matches_found
+  def test_if_dimensions_are_disregarded_if_no_matches_found
     link = @ff.fetch_links("mars", 1, 10000, 10000).values
+    assert link
+
+    link = @ff.fetch_links("mars", 1, -2, -2).values
     assert link
   end
 

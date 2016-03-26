@@ -27,7 +27,7 @@ module Fotofetch
       urls = (urls.select { |link| link.include?(".jpg") || link.include?(".png") })
       restrict_dimensions(urls, width, height, amount) if restrictions?(width, height)
       @results = urls if @results.empty?
-      urls = @results[0..(amount-1)] # selects only number of links desired, default is 1.
+      urls = @results[0..(amount-1)]
       add_sources(urls)
     end
 
@@ -79,6 +79,5 @@ module Fotofetch
       size = FastImage.size(link)
       size.nil? ? [0, 0] : size
     end
-
   end
 end
