@@ -30,7 +30,7 @@ link = @fetcher.fetch_links("tesla model s")
 ```  
 - To save the link to your file directory (links must be in an array, so call .values):
 ```ruby
-@ff.save_images(link.values, './')
+@fetcher.save_images(link.values, './')
 ```  
 The 'save_images' method takes two arguments: link(s) and the file path for where to save. File names are gerated from the previous query, so if you search for 2 images of 'red_ball', they will be saved as 'red_ball_0.jpg' and 'red_ball_1.jpg'.
 
