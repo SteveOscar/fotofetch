@@ -5,48 +5,80 @@ require 'fastimage'
 
 module Fotofetch
   class Fetch
-    def fetch_links(topic, amount=1, width= +9999, height= +9999)
-      @query = topic
-      @results = []
-      scrape(topic, amount, width, height)
+    attr_reader :topic, :results
+    attr_accessor :options
+
+    def initialize(topic="", options={})
+      @topic = topic
+      @options = default_options.merge(options)
     end
 
-    def scrape(topic, amount, width, height)
-      agent = Mechanize.new
-      page = agent.get("http://www.bing.com/images/search?q=#{topic}")
-      pluck_urls(page, amount, width, height)
+    def default_amount; 1; end
+    def default_height; 9999; end
+    def default_width; 9999; end
+    def default_search_url; "http://www.bing.com/images/search?q="; end
+
+    def default_options
+      { amount: default_amount,
+        width: default_width,
+        height: default_height,
+        search_url: default_search_url }
     end
 
-    def pluck_urls(page, amount, width, height)
-      urls = []
-      page.links.each { |link| urls << link.href } # gathers all urls.
-      pluck_imgs(urls, amount, width, height)
+    def fetch_links(topic, amount=self.default_amount, width=self.default_width,
+                    height=self.default_height)
+      create_options(amount, width, height)
+      @topic = topic if !topic.nil?
+
+      page = scrape(self.topic)
+      urls = pluck_urls(page)
+      imgs = pluck_imgs(urls)
+      imgs = restrict_dimensions(imgs, self.options)
+      @results = add_sources(imgs)
     end
 
-    def pluck_imgs(urls, amount, width, height)
-      urls = (urls.select { |link| link.include?(".jpg") || link.include?(".png") })
-      restrict_dimensions(urls, width, height, amount) if restrictions?(width, height)
-      @results = urls if @results.empty?
-      urls = @results[0..(amount-1)]
-      add_sources(urls)
+    def create_options(amount, width, height)
+      # if custom options were provided in init, they will not be overriden
+      self.options[:amount] = amount if amount != default_amount
+      self.options[:width] = width if width != default_width
+      self.options[:height] = height if height!= default_height
     end
 
-    def restrictions?(width, height)
-      (width != 9999 || height!= 9999) ? true : false
+    def scrape(topic)
+      Mechanize.new.get(self.options[:search_url] + topic)
     end
 
-    def restrict_dimensions(urls, width, height, amount)
-      urls.each do |link|
-        select_links(link, width, height) unless @results.length >= amount
+    def pluck_urls(page)
+      page.links.map { |link| link.href } # gathers all urls.
+    end
+
+    def image_link?(link)
+      link.include?(".jpg") || link.include?(".png")
+    end
+
+    def pluck_imgs(urls)
+      urls.select { |link| image_link?(link) }
+    end
+
+    def custom_restrictions?(options)
+      (options[:width] != default_options[:width]) ||
+      (options[:height] != default_options[:height])
+    end
+
+    def restrict_dimensions(urls, options)
+      return urls.take(options[:amount]) if !custom_restrictions?(options)
+
+      urls.each_with_object([]) do |link, size_checked|
+        dimensions = link_dimensions(link)
+        next if dimensions == [0, 0]
+        return size_checked if size_checked.length >= options[:amount]
+        size_checked << link if size_ok?(dimensions, options)
       end
     end
 
-    def select_links(link, width, height)
-      # Two arrays: first is dimension restrictions, 2nd is link dimensions.
-      sizes = [[width, height], link_dimensions(link)]
-      unless link_dimensions(link) == [0, 0] # Throws out non-direct-image links
-        @results << link if width_ok?(sizes) && height_ok?(sizes)
-      end
+    def size_ok?(dimensions, options)
+      sizes = [[options[:width], options[:height]], dimensions]
+      width_ok?(sizes) && height_ok?(sizes)
     end
 
     def width_ok?(sizes)
@@ -59,25 +91,27 @@ module Fotofetch
       (0 < height && height < sizes[1][1]) || height > (sizes[1][1] * 2)
     end
 
+    def root_url(link)
+      link.split("/")[2]
+    end
+
     # Adds root urls as hash keys
     def add_sources(urls)
-      results = {}.compare_by_identity
-      urls.each { |link| results[link.split("/")[2]] = link}
-      results
+      urls.map { |link| [root_url(link), link] }.to_h
     end
 
     # takes an array of links
     def save_images(urls, file_path)
       urls.each_with_index do |url, i|
-        open("#{@query.gsub(' ', '-')}_#{i}.jpg", 'wb') do |file|
+        open("#{@topic.gsub(' ', '-')}_#{i}.jpg", 'wb') do |file|
           file << open(url).read
         end
       end
     end
 
     def link_dimensions(link)
-      size = FastImage.size(link)
-      size.nil? ? [0, 0] : size
+      # nil results in [0,0] which means is non-direct-image link
+      FastImage.size(link) || [0,0]
     end
   end
 end
