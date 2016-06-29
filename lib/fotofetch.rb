@@ -5,43 +5,33 @@ require 'fastimage'
 
 module Fotofetch
   class Fetch
-    attr_reader :topic, :results
     attr_accessor :options
 
-    def initialize(topic="", options={})
-      @topic = topic
-      @options = default_options.merge(options)
-    end
-
-    def default_amount; 1; end
-    def default_height; 9999; end
-    def default_width; 9999; end
-    def default_search_url; "http://www.bing.com/images/search?q="; end
-
     def default_options
-      { amount: default_amount,
-        width: default_width,
-        height: default_height,
-        search_url: default_search_url }
+      { amount: 1,
+        width: 9999,
+        height: 9999,
+        search_url: "http://www.bing.com/images/search?q=" }
     end
 
-    def fetch_links(topic, amount=self.default_amount, width=self.default_width,
-                    height=self.default_height)
+    def fetch_links(topic, amount=default_options[:amount],
+      width=default_options[:width], height=default_options[:height])
+      @topic = topic
       create_options(amount, width, height)
-      @topic = topic if !topic.nil?
 
-      page = scrape(self.topic)
+      page = scrape(@topic)
       urls = pluck_urls(page)
       imgs = pluck_imgs(urls)
       imgs = restrict_dimensions(imgs, self.options)
-      @results = add_sources(imgs)
+      results = add_sources(imgs)
     end
 
     def create_options(amount, width, height)
-      # if custom options were provided in init, they will not be overriden
-      self.options[:amount] = amount if amount != default_amount
-      self.options[:width] = width if width != default_width
-      self.options[:height] = height if height!= default_height
+      self.options = default_options.merge({
+        amount: amount,
+        width: width,
+        height: height
+      })
     end
 
     def scrape(topic)
@@ -110,7 +100,7 @@ module Fotofetch
     end
 
     def link_dimensions(link)
-      # nil results in [0,0] which means is non-direct-image link
+      # nil from FastImate will return [0,0] which means non-direct-image link
       FastImage.size(link) || [0,0]
     end
   end
