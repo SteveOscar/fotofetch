@@ -87,7 +87,9 @@ module Fotofetch
 
     # Adds root urls as hash keys
     def add_sources(urls)
-      urls.map { |link| [root_url(link), link] }.to_h
+      urls.each_with_object( {}.compare_by_identity ) do |link, pairs|
+        pairs[root_url(link)] = link
+      end
     end
 
     # takes an array of links
