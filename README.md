@@ -48,7 +48,7 @@ To find 3 large photos of Jupiter:
 ```ruby
 links = @fetcher.fetch_links("jupiter", 3, 1500, 1500)
 ```
-And to save all of those links:
+And to save those 3 large photos:
 ```ruby
 @fetcher.save_images(links.values, './')
 ```
